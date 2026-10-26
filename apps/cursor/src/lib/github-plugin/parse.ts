@@ -439,8 +439,7 @@ export async function parseGitHubPlugin(
     const firstIndex = components.length;
     const ruleFiles = tree.filter(
       (f) =>
-        f.type === "blob" &&
-        pathUnder(prefix, "rules/.*\\.mdc$").test(f.path),
+        f.type === "blob" && pathUnder(prefix, "rules/.*\\.mdc$").test(f.path),
     );
     for (const rf of ruleFiles) {
       const raw = await fetchGitHubFile(owner, repo, rf.path);
@@ -502,8 +501,7 @@ export async function parseGitHubPlugin(
 
     const agentFiles = tree.filter(
       (f) =>
-        f.type === "blob" &&
-        pathUnder(prefix, "agents/.*\\.md$").test(f.path),
+        f.type === "blob" && pathUnder(prefix, "agents/.*\\.md$").test(f.path),
     );
     for (const af of agentFiles) {
       const raw = await fetchGitHubFile(owner, repo, af.path);
