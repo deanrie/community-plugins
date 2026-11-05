@@ -119,7 +119,11 @@ function parseFrontmatter(input: string): {
 export function parseGitHubUrl(
   url: string,
 ): { owner: string; repo: string } | null {
-  const match = url.match(/github\.com\/([^/]+)\/([^/]+?)(?:\.git)?(?:\/|$)/);
+  // Stop the repo name at `?` and `#` as well as `/`: GitHub's own links
+  // carry `?tab=readme-ov-file` or `#readme`.
+  const match = url.match(
+    /github\.com\/([^/?#]+)\/([^/?#]+?)(?:\.git)?(?:[/?#]|$)/,
+  );
   if (!match) return null;
   return { owner: match[1], repo: match[2] };
 }
