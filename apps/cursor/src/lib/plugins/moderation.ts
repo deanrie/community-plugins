@@ -165,7 +165,20 @@ async function updatePlugin(
   return { before, after };
 }
 
-export function approvePlugin(ctx: ModerationContext, pluginId: string) {
+/**
+ * Publishes a hidden plugin the scan has not flagged. A flagged or blocked
+ * plugin goes through `approveFlaggedPlugin`, which also clears the flags and
+ * the block; publishing it here would leave `permanently_blocked` set, so the
+ * next scan hides it again. The MCP tool, the hidden-plugins queue and the
+ * detail-page panel all land here, so the check lives here.
+ */
+export async function approvePlugin(ctx: ModerationContext, pluginId: string) {
+  const state = await getPluginModerationState(pluginId);
+  if (state.scan_status === "flagged" || state.permanently_blocked) {
+    throw new ModerationError(
+      `"${state.slug}" is flagged or blocked. Review it in the Flagged queue instead.`,
+    );
+  }
   return updatePlugin(ctx, "approve", pluginId, { active: true });
 }
 
