@@ -224,11 +224,23 @@ export async function rescanPlugin(ctx: ModerationContext, pluginId: string) {
   return result;
 }
 
-export function setPluginVerified(
+export async function setPluginVerified(
   ctx: ModerationContext,
   pluginId: string,
   verified: boolean,
 ) {
+  // The badge vouches for the plugin, so a flagged or blocked one can't get
+  // it. The admin verification queue, the detail-page button and the MCP
+  // tool all land here, so the check lives here. Removing the badge is
+  // always allowed.
+  if (verified) {
+    const state = await getPluginModerationState(pluginId);
+    if (state.scan_status === "flagged" || state.permanently_blocked) {
+      throw new ModerationError(
+        `"${state.slug}" is flagged or blocked and cannot be verified.`,
+      );
+    }
+  }
   return updatePlugin(ctx, verified ? "verify" : "unverify", pluginId, {
     verified,
     verified_at: verified ? new Date().toISOString() : null,
